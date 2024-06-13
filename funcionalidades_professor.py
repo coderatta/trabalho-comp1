@@ -1,7 +1,6 @@
 from os import path, replace
 
 
-# funciona
 def turma_existe(codigo_turma):
     try:
         if path.exists("arquivos/turmas.txt"):
@@ -17,7 +16,71 @@ def turma_existe(codigo_turma):
         return False
 
 
-# funciona
+def carrega_alunos(turma: str, forma_avaliacao: str):
+    # acha a posição inicial dos alunos
+    if forma_avaliacao == "a":
+        inicio = 7
+    else:
+        inicio = 7 + int(turma[6])
+    # Carrega os alunos em uma lista
+    alunos = [x for x in turma[inicio:]]
+    # Retorna os alunos separados em sublistas
+    quantidade_avaliacoes = int(turma[6])
+    return [
+        alunos[i : i + 3 + quantidade_avaliacoes]
+        for i in range(0, len(alunos), 3 + quantidade_avaliacoes)
+    ]
+
+
+def exibir_nota(alunos, pesos, quantidade_avaliacoes):
+    if pesos:
+        for i in range(quantidade_avaliacoes):
+            peso = pesos[i]
+            print(f"Peso {i + 1}: {peso}")
+    for aluno in alunos:
+        print(f"Nome: {aluno[0]}, DRE: {aluno[1]}")
+        for i in range(quantidade_avaliacoes):
+            nota = aluno[3:][i]
+            print(f"Nota {i + 1}: {nota}")
+
+
+def exibir_medias(alunos, pesos, quantidade_avaliacoes, forma_avaliacao):
+    for aluno in alunos:
+        if forma_avaliacao == "a":
+            media = (
+                sum(float(aluno[3:][i]) for i in range(quantidade_avaliacoes))
+                / quantidade_avaliacoes
+            )
+        else:
+            soma = sum(
+                pesos[i] * float(aluno[3:][i]) for i in range(quantidade_avaliacoes)
+            )
+            media = soma / sum(pesos)
+        print(f"Nome: {aluno[0]}, DRE: {aluno[1]}, Média: {media}")
+
+
+def exibir_frequencia(alunos):
+    for aluno in alunos:
+        print(f"Nome: {aluno[0]}, DRE: {aluno[1]}, Frequência: {aluno[2]}%")
+
+
+def exibir_info_turma(turma, formas_avaliacao, pesos, quantidade_avaliacoes):
+    print(f"Código da disciplina: {turma[0]}")
+    print(f"Nome da disciplina: {turma[1]}")
+    print(f"Código da turma: {turma[2]}")
+    print(f"Semestre: {turma[3]}")
+    print(f"Horário: {turma[4]}h")
+    forma_avaliacao_completa = (
+        "Média Aritmética" if formas_avaliacao == "a" else "Média Ponderada"
+    )
+    print(f"Forma de avaliação: {forma_avaliacao_completa}")
+    print(f"Avaliações: {turma[6]}")
+    if pesos:
+        for i in range(quantidade_avaliacoes):
+            peso = pesos[i]
+            print(f"Peso {i + 1}: {peso}")
+
+
 def cadastrar_turma():
     codigo_turma = input("Código da turma: ")
     if turma_existe(codigo_turma):
@@ -88,6 +151,7 @@ def cadastrar_turma():
     print("Turma cadastrada com sucesso.")
 
 
+# problema
 def editar_turma():
     codigo_turma = input("Código da turma: ")
     if not turma_existe(codigo_turma):
@@ -181,7 +245,6 @@ def editar_turma():
     print("Turma modificada com sucesso.")
 
 
-# funciona
 def excluir_turma():
     turma_a_ser_removida = 0
     codigo_turma = input("Código da turma: ")
@@ -212,139 +275,40 @@ def exibir_informacoes_turma():
     if not turma_existe(codigo_turma):
         print("Turma não existe")
         return
-
     with open("arquivos/turmas.txt", "r") as turmas:
         for turma in turmas:
-            if turma.strip().split(",")[2] == codigo_turma:
-                quantidade_avaliacoes = int(turma.strip().split(",")[6])
-                pesos = turma.strip().split(",")[
-                    7 : 7 + int(turma.strip().split(",")[6])
-                ]
+            turma = turma.strip().split(",")
+            if turma[2] == codigo_turma:
+                quantidade_avaliacoes = int(turma[6])
+                forma_avaliacao = turma[5]
+                pesos = None
+
+                if forma_avaliacao == "p":
+                    pesos = list(map(int, turma[7 : 7 + quantidade_avaliacoes]))
+
+                alunos = carrega_alunos(turma, forma_avaliacao)
+
                 while True:
                     print("1. Ver as notas")
                     print("2. Ver as médias")
                     print("3. Ver a frequência")
-                    print("4. Ver tudo")
+                    print("4. Ver informações da turma")
+                    print("5. Sair")
                     escolha = input("O que quer fazer: ")
                     if escolha == "1":
-                        if turma.strip().split(",")[5] == "a":
-                            pass
-
-                        else:
-                            # carrega os alunos em uma lista
-                            alunos = [
-                                x
-                                for x in turma.strip().split(",")[
-                                    7 + int(turma.strip().split(",")[6]) :
-                                ]
-                            ]
-                            # separa os alunos em sublistas
-                            alunos_lista = [
-                                alunos[i : i + 3 + int(turma.strip().split(",")[6])]
-                                for i in range(
-                                    0, len(alunos), 3 + int(turma.strip().split(",")[6])
-                                )
-                            ]
-                            # printa os alunos e suas notas com os pesos
-                            for aluno in alunos_lista:
-                                print(f"Nome: {aluno[0]}, DRE: {aluno[1]}")
-                                for i in range(int(quantidade_avaliacoes)):
-                                    print(
-                                        f"Nota {i + 1}: {aluno[3:][i]}, Peso {pesos[i]}"
-                                    )
-
+                        exibir_nota(alunos, pesos, quantidade_avaliacoes)
                     elif escolha == "2":
-                        if turma.strip().split(",")[5] == "a":
-                            pass
-                        else:
-                            # carrega os alunos em uma lista
-                            alunos = [
-                                x
-                                for x in turma.strip().split(",")[
-                                    7 + int(turma.strip().split(",")[6]) :
-                                ]
-                            ]
-                            # separa os alunos em sublistas
-                            alunos_lista = [
-                                alunos[i : i + 3 + int(turma.strip().split(",")[6])]
-                                for i in range(
-                                    0, len(alunos), 3 + int(turma.strip().split(",")[6])
-                                )
-                            ]
-                            # faz a media ponderada e printa
-                            for aluno in alunos_lista:
-                                soma = 0
-                                for i in range(int(quantidade_avaliacoes)):
-                                    soma += int(pesos[i]) * float(aluno[3:][i])
-                                media = soma / sum([int(peso) for peso in pesos])
-                                print(
-                                    f"Nome: {aluno[0]}, DRE: {aluno[1]}, Média: {media}"
-                                )
+                        exibir_medias(
+                            alunos, pesos, quantidade_avaliacoes, forma_avaliacao
+                        )
                     elif escolha == "3":
-                        if turma.strip().split(",")[5] == "a":
-                            pass
-                        else:
-                            # carrega os alunos em uma lista
-                            alunos = [
-                                x
-                                for x in turma.strip().split(",")[
-                                    7 + int(turma.strip().split(",")[6]) :
-                                ]
-                            ]
-                            # separa os alunos em sublistas
-                            alunos_lista = [
-                                alunos[i : i + 3 + int(turma.strip().split(",")[6])]
-                                for i in range(
-                                    0, len(alunos), 3 + int(turma.strip().split(",")[6])
-                                )
-                            ]
-                            for aluno in alunos_lista:
-                                print(
-                                    f"Nome: {aluno[0]}, DRE: {aluno[1]}, Frequência: {aluno[2]}%"
-                                )
+                        exibir_frequencia(alunos)
                     elif escolha == "4":
-                        if turma.strip().split(",")[5] == "a":
-                            pass
-                        else:
-                            # carrega os alunos em uma lista
-                            alunos = [
-                                x
-                                for x in turma.strip().split(",")[
-                                    7 + int(turma.strip().split(",")[6]) :
-                                ]
-                            ]
-                            # separa os alunos em sublistas
-                            alunos_lista = [
-                                alunos[i : i + 3 + int(turma.strip().split(",")[6])]
-                                for i in range(
-                                    0, len(alunos), 3 + int(turma.strip().split(",")[6])
-                                )
-                            ]
-                            # printa as info da turma e dos alunos
-                            print(
-                                "Código da disciplina: " + turma.strip().split(",")[0]
-                            )
-                            print("Nome da disciplina: " + turma.strip().split(",")[1])
-                            print("Código da turma: " + turma.strip().split(",")[2])
-                            print("Semestre: " + turma.strip().split(",")[3])
-                            print("Horário: " + turma.strip().split(",")[4] + "h")
-                            if turma.strip().split(",")[5] == "a":
-                                print(f"Forma de avaliação: Média aritmética")
-                            else:
-                                print(f"Forma de avaliação: Média ponderada")
-                            for aluno in alunos_lista:
-                                soma = 0
-                                print(
-                                    f"Nome: {aluno[0]}, DRE: {aluno[1]}, Frequência: {aluno[2]}%"
-                                )
-                                for i in range(int(quantidade_avaliacoes)):
-                                    print(
-                                        f"Nota {i + 1}: {aluno[3:][i]}, Peso {pesos[i]}"
-                                    )
-                                    soma += int(pesos[i]) * float(aluno[3:][i])
-                                media = soma / sum([int(peso) for peso in pesos])
-                                print(f"Média: {media}")
-                                print()
+                        exibir_info_turma(
+                            turma, forma_avaliacao, pesos, quantidade_avaliacoes
+                        )
+                    elif escolha == "5":
+                        break
                     else:
                         print("Opção inválida!")
 
