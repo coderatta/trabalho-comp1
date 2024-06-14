@@ -51,7 +51,7 @@ def main():
                 dre = input("Digite seu DRE denovo por favor: ")
                 while True:
                     print("1. Ver notas")
-                    print("2. Ver médias e cálculo da média final")
+                    print("2. Ver médias")
                     print("3. Ver frequência")
                     print("4. Calcular pontos necessários para aprovação")
                     print("5. Logout")
