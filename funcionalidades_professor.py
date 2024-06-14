@@ -252,20 +252,20 @@ def excluir_turma():
         print("Turma não existe")
         return
 
-    with open("arquivos/turmas.txt", "r") as arq, open(
+    with open("arquivos/turmas.txt", "r") as turmas, open(
         "arquivos/turmas_temp.txt", "w"
-    ) as arq_temp:
+    ) as turmas_temp:
         # seleciona a turma a ser removida
-        for linha in arq:
+        for linha in turmas:
             if linha.strip().split(",")[2] == codigo_turma:
                 turma_a_ser_removida = linha
         print(turma_a_ser_removida)
         # passa as outras turmas para um novo arquivo
-        arq.seek(0)
-        for linha in arq:
+        turmas.seek(0)
+        for linha in turmas:
             print(linha)
             if linha != turma_a_ser_removida:
-                arq_temp.write(linha)
+                turmas_temp.write(linha)
 
         replace("arquivos/turmas_temp.txt", "arquivos/turmas.txt")
 
@@ -321,7 +321,44 @@ def calcular_estatisticas_turma():
 
 
 def exibir_informacoes_aluno():
-    codigo_turma = input("Código da turma: ")
-    if not turma_existe(codigo_turma):
-        print("Turma não existe")
-        return
+    dre = input("Digite o DRE do aluno ")
+    # printa as info da turma
+    with open("arquivos/turmas.txt", "r") as turmas:
+        for turma in turmas:
+            turma = turma.strip().split(",")
+            forma_avaliacao = turma[5]
+            quantidade_avaliacoes = int(turma[6])
+            pesos = None
+            alunos = carrega_alunos(turma, forma_avaliacao)
+            for aluno in alunos:
+                if dre in aluno:
+                    print(f"Código da disciplina: {turma[0]}")
+                    print(f"Nome da disciplina: {turma[1]}")
+                    print(f"Código da turma: {turma[2]}")
+                    if forma_avaliacao == "p":
+                        pesos = list(map(int, turma[7 : 7 + quantidade_avaliacoes]))
+                        for i in range(quantidade_avaliacoes):
+                            peso = pesos[i]
+                            print(f"Peso {i + 1}: {peso}")
+                    # printa as notas
+                    for i in range(quantidade_avaliacoes):
+                        nota = aluno[3:][i]
+                        print(f"Nota {i + 1}: {nota}")
+                    # printa a media
+                    if forma_avaliacao == "a":
+                        media = (
+                            sum(
+                                float(aluno[3:][i])
+                                for i in range(quantidade_avaliacoes)
+                            )
+                            / quantidade_avaliacoes
+                        )
+                    else:
+                        soma = sum(
+                            pesos[i] * float(aluno[3:][i])
+                            for i in range(quantidade_avaliacoes)
+                        )
+                        media = soma / sum(pesos)
+                    print(
+                        f"Nome: {aluno[0]}, DRE: {aluno[1]}, Frequência: {aluno[2]}, Média: {media}"
+                    )
