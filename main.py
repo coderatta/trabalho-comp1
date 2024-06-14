@@ -48,6 +48,7 @@ def main():
 
         elif escolha == "2":
             if autenticar_aluno():
+                dre = input("Digite seu DRE denovo por favor: ")
                 while True:
                     print("1. Ver notas")
                     print("2. Ver médias e cálculo da média final")
@@ -58,13 +59,13 @@ def main():
                     escolha = input("Escolha uma opcao: ")
 
                     if escolha == "1":
-                        ver_notas()
+                        ver_notas(dre)
                     elif escolha == "2":
-                        ver_medias()
+                        ver_medias(dre)
                     elif escolha == "3":
-                        ver_frequencia()
+                        ver_frequencia(dre)
                     elif escolha == "4":
-                        calcular_quanto_falta_para_aprovacao()
+                        calcular_quanto_falta_para_aprovacao(dre)
                     elif escolha == "5":
                         break
                     elif escolha == "6":
