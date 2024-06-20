@@ -12,7 +12,8 @@ def main():
         escolha = input("Escolha uma opção: ")
 
         if escolha == "1":
-            if autenticar_professor():
+            autenticado, nome = autenticar_professor()
+            if autenticado:
                 while True:
                     print("1. Cadastrar turma")
                     print("2. Editar turma")
@@ -26,11 +27,11 @@ def main():
                     escolha = input("Escolha uma opção: ")
 
                     if escolha == "1":
-                        cadastrar_turma()
+                        cadastrar_turma(nome)
                     elif escolha == "2":
-                        editar_turma()
+                        editar_turma(nome)
                     elif escolha == "3":
-                        excluir_turma()
+                        excluir_turma(nome)
                     elif escolha == "4":
                         cadastrar_aluno()
                     elif escolha == "5":
@@ -47,8 +48,8 @@ def main():
                         print("Opção inválida!")
 
         elif escolha == "2":
-            if autenticar_aluno():
-                dre = input("Digite seu DRE denovo por favor: ")
+            autenticado, dre = autenticar_aluno()
+            if autenticado:
                 while True:
                     print("1. Ver notas")
                     print("2. Ver médias")

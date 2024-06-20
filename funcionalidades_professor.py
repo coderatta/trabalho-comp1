@@ -1,5 +1,14 @@
 from os import path, replace
 
+posicao_codigo_turma = 0
+posicao_codigo_disciplina = 1
+posicao_nome_disciplina = 2
+posicao_ano_semestre = 3
+posicao_horario = 4
+posicao_forma_avaliacao = 5
+posicao_quantidade_avaliacoes = 6
+posicao_nome_professor = posicao_forma_avaliacao + 1
+
 
 def turma_existe(codigo_turma):
     try:
@@ -81,11 +90,15 @@ def exibir_info_turma(turma, formas_avaliacao, pesos, quantidade_avaliacoes):
             print(f"Peso {i + 1}: {peso}")
 
 
-def cadastrar_turma():
+def cadastrar_turma(nome_professor):
+    # verifica se a turma existe, se existir volta para o menu
     codigo_turma = input("Código da turma: ")
-    if turma_existe(codigo_turma):
-        print("Turma já existe.")
-        return
+    with open("arquivos/turmas.txt", "r") as arquivo:
+        for linha in arquivo:
+            codigo_turma_cadastrado = linha.strip().split(",")[posicao_codigo_turma]
+            if codigo_turma_cadastrado == codigo_turma:
+                print("Turma já cadastrada.")
+                return
 
     # pede os dados da turma
     codigo_disciplina = input("Código da disciplina: ")
@@ -94,61 +107,53 @@ def cadastrar_turma():
     horario = input("Horário: ")
     formas_avaliacao = input("Formas de avaliação: a/p ")
     quantidade_avaliacoes = int(input("Quantas avaliações: "))
+    pesos = ("1," * quantidade_avaliacoes)[:-1]  # remove a ultima virgula
     if formas_avaliacao == "p":
         pesos = input("Digite os pesos separados por vírgula: ")
 
     # mostra os alunos cadastrados no sistema
-    print("Adicionar alunos.")
-    escolha = input("Ver alunos cadastrados no sistema: s/n ")
+    escolha = input("Ver alunos cadastrados no sistema: s/n ").lower()
     if escolha == "s":
-        if path.exists("arquivos/alunos.txt"):
-            with open("arquivos/alunos.txt", "r") as arquivo:
-                for aluno in arquivo:
-                    nome, _, dre = aluno.strip().split(",")
-                    print(f"Nome: {nome}, DRE: {dre}")
+        with open("arquivos/alunos.txt", "r") as arquivo:
+            for linha in arquivo:
+                nome_cadastrado, dre_cadastrado = linha.strip().split(",")
+                print(f"Nome: {nome_cadastrado.title()}, DRE: {dre_cadastrado}")
 
+    # verifica se o aluno sendo cadastrado na turma existe no sistema
     alunos = []
     while True:
         nome = input("Nome do aluno: ")
         dre = input("DRE do aluno: ")
-        # verifica se o aluno existe no sistema
         aluno_existe = False
-        if path.exists("arquivos/alunos.txt"):
-            with open("arquivos/alunos.txt", "r") as arquivo:
-                for linha in arquivo:
-                    _, _, dre_cadastrado = linha.strip().split(",")
-                    if dre_cadastrado == dre:
-                        aluno_existe = True
-                        break
+        with open("arquivos/alunos.txt", "r") as arquivo:
+            for linha in arquivo:
+                nome_cadastrado, dre_cadastrado = linha.strip().split(",")
+                if nome_cadastrado == nome and dre_cadastrado == dre:
+                    aluno_existe = True
 
         if not aluno_existe:
-            print("Aluno não existe no sistema.")
+            print("Aluno não encontrado, verifique a digitação")
             continue
-        # adiciona o aluno na lista de alunos
+
         frequencia = 0
-        notas = [0] * quantidade_avaliacoes
+        notas = ("0," * quantidade_avaliacoes)[:-1]  # remove a ultima virgula
         alunos.append((nome, dre, frequencia, notas))
 
-        adicionar_mais = input("Deseja adicionar mais um aluno (s/n)? ")
-        if adicionar_mais.lower() != "s":
+        escolha = input("Deseja adicionar mais um aluno (s/n)? ").lower()
+        if escolha != "s":
             break
 
+    # formata as informacoes para serem gravadas
+    turma_info = f"{codigo_turma},{nome_disciplina},{codigo_disciplina},{ano_semestre},{horario},{formas_avaliacao},{quantidade_avaliacoes},{pesos},{nome_professor}"
+    alunos_info = ""
+    for aluno in alunos:
+        nome, dre, frequencia, notas = aluno
+        alunos_info += f",{nome},{dre},{frequencia},{notas}"
+
     # salva a turma e os alunos no arquivo
-    with open("arquivos/turmas.txt", "a") as turmas:
-        if formas_avaliacao == "p":
-            turma_info = f"{codigo_disciplina},{nome_disciplina},{codigo_turma},{ano_semestre},{horario},{formas_avaliacao},{quantidade_avaliacoes},{pesos}"
-        else:
-            turma_info = f"{codigo_disciplina},{nome_disciplina},{codigo_turma},{ano_semestre},{horario},{formas_avaliacao},{quantidade_avaliacoes}"
-
-        alunos_info = ""
-        for aluno in alunos:
-            nome, dre, frequencia, notas = aluno
-            notas_str = ",".join(map(str, notas))
-            alunos_info += f",{nome},{dre},{frequencia},{notas_str}"
-
-        turmas.write(f"{turma_info}{alunos_info}\n")
-
-    print("Turma cadastrada com sucesso.")
+    with open("arquivos/turmas.txt", "a+") as arquivo:
+        arquivo.write(f"{turma_info}{alunos_info}\n")
+        print("Turma cadastrada com sucesso.")
 
 
 # problema
@@ -314,10 +319,7 @@ def exibir_informacoes_turma():
 
 
 def calcular_estatisticas_turma():
-    codigo_turma = input("Código da turma: ")
-    if not turma_existe(codigo_turma):
-        print("Turma não existe")
-        return
+    pass
 
 
 def exibir_informacoes_aluno():
