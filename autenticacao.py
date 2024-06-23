@@ -35,7 +35,6 @@ def autenticar_professor():
         nome = input("Nome: ")
         senha = input("Senha: ")
         senha_hash = sha256(senha.encode()).hexdigest()
-
         with open("arquivos/professores.txt", "r") as arquivo:
             for linha in arquivo:
                 nome_cadastrado, senha_hash_cadastrada = linha.strip().split(",")
@@ -56,10 +55,6 @@ def autenticar_professor():
 def cadastrar_aluno():
     posicao_dre = 1
     try:
-        # verifica se a pasta com os arquivos existe
-        if not path.exists("arquivos"):
-            makedirs("arquivos")
-
         with open("arquivos/alunos.txt", "a+") as arquivo:
             nome = input("Nome do aluno: ")
             dre = input("DRE do aluno: ")
@@ -85,7 +80,6 @@ def autenticar_aluno():
     posicao_dre = 1
     try:
         dre = input("DRE: ")
-
         with open("arquivos/alunos.txt", "r") as arquivo:
             for linha in arquivo:
                 dre_cadastrado = linha.strip().split(",")[posicao_dre]
